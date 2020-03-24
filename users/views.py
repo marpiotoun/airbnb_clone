@@ -1,25 +1,17 @@
 import os
 import requests
-from django.http import HttpResponseRedirect
-from django.views import View
 from django.views.generic import FormView
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.core.files.base import ContentFile
 from . import forms, models
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 
 
 class LoginView(FormView):
-    # content_type = None
-    # extra_context = None
     form_class = forms.LoginForm
-    # http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace']
-    # initial = {}
-    # prefix = None
-    # _lazy means that it call data when it is used
     success_url = reverse_lazy('core:home')
-    # template_engine = None
     template_name = 'users/login.html'
 
     def form_valid(self, form):
@@ -28,10 +20,12 @@ class LoginView(FormView):
         user = authenticate(self.request, username=email, password=password)
         if user is not None:
             login(self.request, user)
+            messages.success(self.request, f'Welcome back {user.first_name}')
         return super().form_valid(form)
 
 
 def logout_view(request):
+    messages.info(request, f"See you later {request.user.first_name}")
     logout(request)
     return redirect(reverse('core:home'))
 
@@ -40,11 +34,7 @@ class SignUpView(FormView):
     form_class = forms.SignUpForm
     success_url = reverse_lazy('core:home')
     template_name = 'users/signup.html'
-    initial = {
-        'first_name': 'Sangsoo',
-        'last_name': 'Han',
-        'email': 'plus470@naver.com'
-    }
+
     def form_valid(self, form):
         form.save()
         email = form.cleaned_data.get("email")
@@ -76,7 +66,6 @@ def github_login(request):
 class GithubException(Exception):
     pass
 
-
 def github_callback(request):
     try:
         client_id = os.environ.get('CLIENT_ID')
@@ -88,7 +77,7 @@ def github_callback(request):
             token_json = token_request.json()
             error = token_json.get("error")
             if error is not None:
-                raise GithubException()
+                raise GithubException("Something wrong with your login with github")
             access_token = token_json.get('access_token')
             profile_request = requests.get('https://api.github.com/user',
                                        headers={'Authorization': f'token {access_token}', "Accept": "application/json"})
@@ -102,7 +91,7 @@ def github_callback(request):
                 try:
                     user = models.User.objects.get(email=email)
                     if user.login_method != 'github':
-                        raise GithubException()
+                        raise GithubException(f"Your email already exist. try: {user.login_method}")
                 except models.User.DoesNotExist:
                     user = models.User.objects.create(
                         username=email,
@@ -114,16 +103,17 @@ def github_callback(request):
                     user.set_unusable_password()
                     user.save()
                 login(request, user)
+                messages.success(request, f'Welcome back {user.first_name}')
                 return redirect(reverse('core:home'))
             else:
-                raise GithubException()
+                raise GithubException("Your Github account doesn't have your name. Try with other method")
             return redirect(reverse("user:login"))
         else:
-            raise GithubException()
-        return redirect(reverse("core:home"))
-    except KakaoException:
-        # Send error msg
-        return redirect(reverse("core:home"))
+            raise GithubException("Can't get your code")
+        return redirect(reverse("user:login"))
+    except GithubException as e:
+        messages.error(request, e)
+        return redirect(reverse("user:login"))
 
 
 def kakao_login(request):
@@ -145,7 +135,7 @@ def kakao_callback(request):
         token_json = token_request.json()
         error = token_json.get('error', None)
         if error is not None:
-            raise KakaoException
+            raise KakaoException("Can't get authorization code")
         access_token = token_json.get('access_token')
         profile_request = requests.get(f'https://kapi.kakao.com/v2/user/me', headers={
             'Authorization': f'Bearer {access_token}'
@@ -155,8 +145,7 @@ def kakao_callback(request):
         user_info = {'login_method': 'kakao', 'email_verified': True}
         email = kakao_account.get('email')
         if email is None:
-            print('email')
-            raise KakaoException
+            raise KakaoException("please also give me your Email")
         user_info.update({'username': email, 'email': email})
         properties = profile_json.get('properties')
         nickname = properties.get('nickname')
@@ -167,7 +156,7 @@ def kakao_callback(request):
         try:
             user = models.User.objects.get(email=email)
             if user.login_method != 'kakao':
-                raise KakaoException
+                raise KakaoException(f"Please log in with: {user.login_method}")
         except models.User.DoesNotExist:
             user = models.User.objects.create(**user_info)
             user.set_unusable_password()
@@ -176,8 +165,10 @@ def kakao_callback(request):
                 photo_request = requests.get(profile_image)
                 user.avatar.save(f'{nickname}-avatar', ContentFile(photo_request.content))
         login(request, user)
+        messages.success(request, f'Welcome back {user.first_name}')
         return redirect(reverse('core:home'))
-    except KakaoException:
+    except KakaoException as e:
+        messages.error(request, e)
         return redirect(reverse('user:login'))
 
 # from django.views import View
@@ -207,11 +198,4 @@ def kakao_callback(request):
 # def logout_view(request):
 #     logout(request)
 #     return redirect(reverse('core:home'))
-"""
-{'login': 'marpiotoun', 'id': 60564849, 'node_id': 'MDQ6VXNlcjYwNTY0ODQ5', 'avatar_url': 'https://avatars0.githubusercontent.com/u/60564849?v=4', 'gravatar_id': '', 'url': 'https://api.github.com/users/marpiotoun', 'html_url': 'https://github.com/marpiotoun', 'fo
-llowers_url': 'https://api.github.com/users/marpiotoun/followers', 'following_url': 'https://api.github.com/users/marpiotoun/following{/other_user}', 'gists_url': 'https://api.github.com/users/marpiotoun/gists{/gist_id}', 'starred_url': 'https://api.github.com/us
-ers/marpiotoun/starred{/owner}{/repo}', 'subscriptions_url': 'https://api.github.com/users/marpiotoun/subscriptions', 'organizations_url': 'https://api.github.com/users/marpiotoun/orgs', 'repos_url': 'https://api.github.com/users/marpiotoun/repos', 'events_url':
-'https://api.github.com/users/marpiotoun/events{/privacy}', 'received_events_url': 'https://api.github.com/users/marpiotoun/received_events', 'type': 'User', 'site_admin': False, 'name': None, 'company': None, 'blog': '', 'location': None, 'email': 'plus470@gmail
-.com', 'hireable': None, 'bio': None, 'public_repos': 6, 'public_gists': 0, 'followers': 0, 'following': 0, 'created_at': '2020-02-02T07:00:44Z', 'updated_at': '2020-03-19T09:13:33Z', 'private_gists': 0, 'total_private_repos': 0, 'owned_private_repos': 0, 'disk_u
-sage': 92684, 'collaborators': 0, 'two_factor_authentication': False, 'plan': {'name': 'free', 'space': 976562499, 'collaborators': 0, 'private_repos': 10000}}
-"""
+

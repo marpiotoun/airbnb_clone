@@ -238,3 +238,5 @@ db.sqlite3
 #resources
 uploads/
 .env
+node_modules/
+

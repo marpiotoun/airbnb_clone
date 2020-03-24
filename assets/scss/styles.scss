@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind component;
+
+.search-box {
+  transition: box-shadow 0.2s linear;
+}
+
+.nav_link{
+  @apply h-full flex items-center border-b-2 border-white;
+  a{
+    @apply font-bold py-10 px-3;
+  }
+  transition: border 0.1s ease-in-out;
+  &:hover{
+    @apply border-gray-600;
+  }
+}
+input{
+  @apply w-full border border-gray-400 font-semibold rounded-sm py-4 pl-4;
+  &:focus{
+    @apply outline-none border-teal-500;
+  }
+}
+form{
+  .input{
+    @apply mb-3;
+    &.has_error{
+      input{
+        @apply border-red-500;
+      }
+    }
+  }
+}
+.btn{
+  @apply w-full border-2 border-gray-300 font-semibold rounded-md text-center py-4;
+}
+
+.photo-card{
+  width: 200px;
+  height: 150px;
+}
+.fa-star{
+  color:darkviolet;
+}
+@keyframes messageFadeIn {
+  0%{
+    opacity: 0;
+  }
+  5%{
+    opacity: 1;
+    transform:translateY(25px);
+  }
+  95% {
+    opacity: 1;
+    transform:translateY(25px);
+  }
+  100%{
+    opacity: 0;
+    transform:translateY(-25px);
+  }
+}
+.message{
+  animation: messageFadeIn 5s ease-in-out forwards;
+  &.info{
+    @apply bg-blue-400;
+  }
+  &.error{
+    @apply bg-red-600;
+  }
+  &.success{
+    @apply bg-green-400;
+  }
+  &.warning{
+    @apply bg-yellow-400;
+  }
+}
+@tailwind utilities;

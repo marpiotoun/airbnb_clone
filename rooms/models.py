@@ -93,9 +93,16 @@ class Room(core_models.AbstractTimeStampedModel):
             all_rating = 0
             for review in all_reviews:
                 all_rating += review.rating()
-            return all_rating/len(all_reviews)
+            return round(all_rating/len(all_reviews),2)
         except ZeroDivisionError as e:
             return None
+
+    def first_photo(self):
+        try:
+            photo, = self.photos.all()[:1]
+        except ValueError:
+            return None
+        return photo.file.url
 
     def get_absolute_url(self):
         return reverse("room:detail", kwargs={'pk': self.pk})
