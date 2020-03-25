@@ -10,7 +10,7 @@
     <h4>{{ room.description }}</h4>
 </div>
     <div>
-        <h3>By: {{ room.host.username }}</h3>
+        <h3><a href="{{ room.host.get_absolute_url }}">{{ room.host.username }}</a></h3>
         {% if room.host.superHost %}
             (superhost)
         {% endif %}

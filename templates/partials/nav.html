@@ -1,7 +1,8 @@
 {% load static %}
 
-<ul class="flex text-sm font-medium h-full">
+<ul class="flex text-sm font-medium h-full bg-white z-10">
     {% if user.is_authenticated %}
+        <li class="nav_link"><a href="{{ user.get_absolute_url }}">Profile</a></li>
         <li class="nav_link ml-8 mr-8"><a href="{% url 'user:logout' %}">Log Out</a></li>
     {% else %}
     <li class="nav_link"><a href="{% url 'user:login' %}">Login</a></li>

@@ -30,6 +30,11 @@ form{
       }
     }
   }
+  textarea{
+    @apply w-full border border-gray-400 font-semibold rounded-sm py-4 pl-4;
+    resize: none;
+    height: auto;
+  }
 }
 .btn{
   @apply w-full border-2 border-gray-300 font-semibold rounded-md text-center py-4;

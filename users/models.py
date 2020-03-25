@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-
+from django.shortcuts import reverse
 
 # Create your models here.
 class User(AbstractUser):
@@ -45,3 +45,6 @@ class User(AbstractUser):
             )
             self.save()
         return
+
+    def get_absolute_url(self):
+        return reverse('user:profile', kwargs={'pk': self.pk})

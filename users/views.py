@@ -1,12 +1,17 @@
 import os
 import requests
-from django.views.generic import FormView
+from django.contrib.auth.views import PasswordChangeView
+from django.views.generic import FormView, DetailView, UpdateView
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.core.files.base import ContentFile
 from . import forms, models
-from django.contrib.auth import authenticate, login, logout
+from django import forms as django_forms
+from django.contrib.auth import authenticate, login, logout, password_validation
 from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
+from django.utils.translation import gettext, gettext_lazy as _
+from django.contrib.messages.views import SuccessMessageMixin
 
 
 class LoginView(FormView):
@@ -170,6 +175,61 @@ def kakao_callback(request):
     except KakaoException as e:
         messages.error(request, e)
         return redirect(reverse('user:login'))
+
+
+class UserProfileView(DetailView):
+    model = models.User
+    context_object_name = 'user_obj'
+    template_name = 'users/profile.html'
+
+
+class UpdateProfileView(SuccessMessageMixin, UpdateView):
+    model = models.User
+    fields = ('first_name', 'last_name', 'bio', 'language')
+    template_name = 'users/update_profile.html'
+    context_object_name = 'user'
+    success_message = 'Profile updated'
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+
+class PasswordChangeForm(SetPasswordForm):
+    """
+    A form that lets a user change their password by entering their old
+    password.
+    """
+    error_messages = {
+        **SetPasswordForm.error_messages,
+        'password_incorrect': _("Your old password was entered incorrectly. Please enter it again."),
+    }
+    old_password = django_forms.CharField(
+        label=_("Old password"),
+        strip=False,
+        widget=django_forms.PasswordInput(attrs={'placeholder': 'Current password', 'autocomplete': 'current-password', 'autofocus': True}),
+    )
+    new_password1 = django_forms.CharField(
+        label=_("New password"),
+        widget=django_forms.PasswordInput(attrs={'placeholder': 'New password', 'autocomplete': 'new-password'}),
+        strip=False,
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    new_password2 = django_forms.CharField(
+        label=_("New password confirmation"),
+        strip=False,
+        widget=django_forms.PasswordInput(attrs={'placeholder': 'Comfirm New password', 'autocomplete': 'new-password'}),
+    )
+    field_order = ['old_password', 'new_password1', 'new_password2']
+
+
+class UpdatePasswordView(PasswordChangeView):
+    template_name = 'users/update_password.html'
+    form_class = PasswordChangeForm
+
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        return self.request.user.get_absolute_url()
+
 
 # from django.views import View
 # from django.shortcuts import render, redirect, reverse
