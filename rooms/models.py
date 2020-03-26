@@ -85,7 +85,6 @@ class Room(core_models.AbstractTimeStampedModel):
         self.city = str.capitalize(self.city)
         super().save(*args, **kwargs)
 
-
     #RATING
     def rating(self):
         try:
@@ -103,6 +102,13 @@ class Room(core_models.AbstractTimeStampedModel):
         except ValueError:
             return None
         return photo.file.url
+
+    def get_next_four_photo(self):
+        try:
+            photos = self.photos.all()[1:]
+        except ValueError:
+            return None
+        return photos
 
     def get_absolute_url(self):
         return reverse("room:detail", kwargs={'pk': self.pk})

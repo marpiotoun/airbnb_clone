@@ -18,15 +18,15 @@
 
 
 
-{#{% if  user_obj.rooms.count > 0 %}#}
-{#    <div class="container flex flex-col items-center">#}
-{#        <h3>{{ user_obj.first_name }}'s Rooms</h3>#}
-{#    </div>#}
-{#    <div class="flex flex-wrap justify-center mb-10 mt-5">#}
-{#            {% for room in user_obj.rooms.all %}#}
-{#                {% include 'mixin/room_card.html' with room=room %}#}
-{#            {% endfor %}#}
-{#    </div>#}
-{#{% endif %}#}
+{% if  user_obj.rooms.count > 0 %}
+    <div class="container flex flex-col items-center">
+        <h3>{{ user_obj.first_name }}'s Rooms</h3>
+    </div>
+    <div class="flex flex-wrap justify-center mb-10 mt-5">
+            {% for room in user_obj.rooms.all %}
+                {% include 'mixin/room_card.html' with room=room %}
+            {% endfor %}
+    </div>
+{% endif %}
 
 {%  endblock content %}

@@ -3,11 +3,11 @@
         <div class="bg-cover bg-center rounded-lg w-full h-48 mb-1" style="background-image: url({{ room.first_photo }})"></div>
     </a>
         <div class="flex justify-between text-sm font-medium">
-            <div class="flex">
+            <div class="flex overflow-hidden">
                 {% if room.host.superHost %}
                     <div class="border border-black rounded-lg mr-1 text-black text-center text-xs py-px px-1"><span class="uppercase">superhost</span></div>
                 {% endif %}
-                <span class="text-sm text-gray-600 font-light">{{ room.city }}</span>
+                <span class="text-sm text-gray-600 font-light truncate">{{ room.city }}</span>
             </div>
             <span class="text-sm flex items-center">
                 <i class="fas fa-star mr-1 text-xs"></i>{{ room.rating }}

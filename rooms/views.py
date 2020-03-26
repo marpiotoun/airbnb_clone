@@ -1,9 +1,12 @@
-from django.views.generic import ListView, DetailView
+from django.http import Http404
+from django.views import View
+from django.views.generic import ListView, DetailView, UpdateView
 # from django.views.generic import View
 # from django.core.paginator import Paginator
 from django.shortcuts import render
 from django_countries import countries
 from . import models
+from users.mixin import LoggedInOnlyMixin
 # from . import forms
 
 
@@ -189,8 +192,26 @@ def search(request):
         })
 
 
+class EditRoom(LoggedInOnlyMixin, UpdateView):
+    model = models.Room
+    template_name = 'rooms/edit_room.html'
+    fields = ('name', 'description', 'Country', 'city', 'address', 'bedrooms', 'beds', 'baths', 'guests', 'price', 'instance_booking', 'room_type', 'amenity', 'facility', 'house_rule')
+    def get_object(self, queryset=None):
+        room = super().get_object(queryset=queryset)
+        if room.host.pk != self.request.user.pk:
+            raise Http404()
+        return room
 
 
+class EditPhotosView(LoggedInOnlyMixin, DetailView):
+    model = models.Room
+    template_name = 'rooms/edit_photos.html'
+
+    def get_object(self, queryset=None):
+        room = super().get_object(queryset=queryset)
+        if room.host.pk != self.request.user.pk:
+            raise Http404()
+        return room
 
 
 
