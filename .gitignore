@@ -240,3 +240,7 @@ uploads/
 .env
 node_modules/
 
+*.xml
+*.iml
+.idea/misc.xml
+.idea/airbnb_clone.iml
