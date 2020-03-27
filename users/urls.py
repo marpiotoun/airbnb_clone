@@ -13,6 +13,7 @@ urlpatterns = [
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('verify/<str:key>/', views.complete_verification, name='complete-verification'),
     path('<int:pk>/', views.UserProfileView.as_view(), name='profile'),
-    path('update-profile', views.UpdateProfileView.as_view(), name='update-profile'),
-    path('update-password', views.UpdatePasswordView.as_view(), name='update-password')
+    path('update-profile/', views.UpdateProfileView.as_view(), name='update-profile'),
+    path('update-password/', views.UpdatePasswordView.as_view(), name='update-password'),
+    path('switch-hosting/', views.switch_host, name='switch-hosting'),
 ]

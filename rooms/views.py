@@ -1,13 +1,17 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http import Http404
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import ListView, DetailView, UpdateView
+from django.views.generic import ListView, DetailView, UpdateView, CreateView, FormView
 # from django.views.generic import View
 # from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django_countries import countries
 from . import models
 from users.mixin import LoggedInOnlyMixin
-# from . import forms
+from . import forms
 
 
 # 3
@@ -196,6 +200,7 @@ class EditRoom(LoggedInOnlyMixin, UpdateView):
     model = models.Room
     template_name = 'rooms/edit_room.html'
     fields = ('name', 'description', 'Country', 'city', 'address', 'bedrooms', 'beds', 'baths', 'guests', 'price', 'instance_booking', 'room_type', 'amenity', 'facility', 'house_rule')
+
     def get_object(self, queryset=None):
         room = super().get_object(queryset=queryset)
         if room.host.pk != self.request.user.pk:
@@ -214,6 +219,54 @@ class EditPhotosView(LoggedInOnlyMixin, DetailView):
         return room
 
 
+@login_required
+def delete_photo(request, room_pk, photo_pk):
+    user = request.user
+    try:
+        room = models.Room.objects.get(pk=room_pk)
+        if room.host.pk != user.pk:
+            messages.error(request, "Can't delete photo")
+        else:
+            models.Photo.objects.filter(pk=photo_pk).delete()
+            messages.success(request, "Delete Complete")
+    except models.Room.DoesNotExist:
+        redirect(reverse('core:home'))
+    return redirect(reverse('room:edit-photos', kwargs={'pk': room_pk}))
+
+
+class UpdatePhotoView(LoggedInOnlyMixin, SuccessMessageMixin, UpdateView):
+    model = models.Photo
+    pk_url_kwarg = 'photo_pk'
+    template_name = 'rooms/update_photo.html'
+    fields = ('caption',)
+    success_message = 'Photo Updated'
+
+    def get_success_url(self):
+        room_pk = self.kwargs.get('room_pk')
+        return reverse('room:edit-photos', kwargs={'pk': room_pk})
+
+
+class AddPhotoView(LoggedInOnlyMixin, FormView):
+    template_name = 'rooms/create_photo.html'
+    fields = ('caption', 'file')
+    form_class = forms.CreatePhotoForm
+
+    def form_valid(self, form):
+        pk = self.kwargs.get('pk')
+        form.save(pk)
+        messages.success(self.request, 'Success photo uploading')
+        return redirect(reverse('room:edit-photos', kwargs={'pk': pk}))
+
+
+class CreateRoomView(LoggedInOnlyMixin, FormView):
+    form_class = forms.CreateRoomForm
+    template_name = 'rooms/create_room.html'
+
+    def form_valid(self, form):
+        room = form.save()
+        room.host = self.request.user
+        room.save()
+        return redirect(reverse('room:detail', kwargs={'pk': room.pk}))
 
 # def room_detail(request, pk):
 #     try:

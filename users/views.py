@@ -1,17 +1,18 @@
 import os
 import requests
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout, password_validation
+from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.core.files.base import ContentFile
 from django.views.generic import FormView, DetailView, UpdateView
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
-from django.core.files.base import ContentFile
-from . import forms, models
+from django.utils.translation import gettext_lazy as _
 from django import forms as django_forms
-from django.contrib.auth import authenticate, login, logout, password_validation
-from django.contrib import messages
-from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
-from django.utils.translation import gettext, gettext_lazy as _
-from django.contrib.messages.views import SuccessMessageMixin
+from . import forms, models
 from users.mixin import LoggedOutOnlyMixin, LoggedInOnlyMixin, EmailLoginOnlyMixin
 
 
@@ -236,6 +237,15 @@ class UpdatePasswordView(EmailLoginOnlyMixin, LoggedInOnlyMixin, PasswordChangeV
     def get_success_url(self):
         """Return the URL to redirect to after processing a valid form."""
         return self.request.user.get_absolute_url()
+
+
+@login_required
+def switch_host(request):
+    try:
+        del request.session['is_hosting']
+    except KeyError:
+        request.session['is_hosting'] = True
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 # from django.views import View

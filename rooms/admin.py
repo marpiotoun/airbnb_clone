@@ -37,7 +37,7 @@ class RoomAdmin(admin.ModelAdmin):
     """Room Admin Definition"""
 
     inlines = (PhotoInline,)
-
+    ordering = ('created',)
     fieldsets = (
         (
             "Basic Info",

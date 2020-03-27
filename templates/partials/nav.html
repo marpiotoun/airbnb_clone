@@ -2,7 +2,17 @@
 
 <ul class="flex text-sm font-medium h-full bg-white z-10">
     {% if user.is_authenticated %}
-        <li class="nav_link"><a href="{{ user.get_absolute_url }}">Profile</a></li>
+        <li class="nav_link"><a href="{% url 'user:switch-hosting' %}">
+            {% if request.session.is_hosting %}
+                Stop hosting
+            {% else %}
+                Start hosting
+            {% endif %}
+        </a></li>
+        {% if request.session.is_hosting %}
+             <li class="nav_link ml-8"><a href="{% url 'room:create' %}">Upload Room</a></li>
+        {% endif %}
+        <li class="nav_link ml-8"><a href="{{ user.get_absolute_url }}">Profile</a></li>
         <li class="nav_link ml-8 mr-8"><a href="{% url 'user:logout' %}">Log Out</a></li>
     {% else %}
     <li class="nav_link"><a href="{% url 'user:login' %}">Login</a></li>
