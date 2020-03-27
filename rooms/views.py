@@ -266,6 +266,8 @@ class CreateRoomView(LoggedInOnlyMixin, FormView):
         room = form.save()
         room.host = self.request.user
         room.save()
+        form.save_m2m()
+        messages.success(self.request, 'Room has been created')
         return redirect(reverse('room:detail', kwargs={'pk': room.pk}))
 
 # def room_detail(request, pk):
