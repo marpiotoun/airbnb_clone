@@ -2,7 +2,7 @@
 {% load sexy_capitals %}
 
 {%  block page_title %}
-    room.name
+    {{ room.name }}
 {% endblock %}
 
 {%  block content %}
@@ -86,10 +86,9 @@
             {% else %}
                 {% if not request.session.is_hosting %}
                     <div class="calender">
-                        {{ "Calender"|sexy_capitals }}
                         {% for calendar in room.get_calendars %}
                         <div class="mb-20 flex flex-col justify-center items-center">
-                            <span class="text-center text-lg block mb-8 font-bold">{{ calendar.get_month }} / {{ calendar.year }}</span>
+                            <span class="text-center text-lg block mb-8 font-bold">{{ calendar.get_month|s }} / {{ calendar.year }}</span>
 
                             <div class="cal-grid mb-4">
                                 {% for day in calendar.day_name %}

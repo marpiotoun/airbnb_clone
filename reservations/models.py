@@ -3,6 +3,19 @@ from django.utils import timezone
 from core.models import AbstractTimeStampedModel
 
 
+class BookedDay(AbstractTimeStampedModel):
+
+    day = models.DateField()
+    reservation = models.ForeignKey('Reservation', related_name='booked_day', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Booked Day"
+        verbose_name_plural = "Booked Days"
+
+    def __str__(self):
+        return str(self.day)+" at "+self.reservation.room.name
+
+
 class Reservation(AbstractTimeStampedModel):
     """Reservation Model Definition"""
     STATUS_CHOICES = list(zip(['pending', 'confirmed', 'canceled'], ['Pending', 'Confirmed', 'Canceled']))
@@ -26,3 +39,24 @@ class Reservation(AbstractTimeStampedModel):
 
     def __str__(self):
         return f'{self.room}-{self.check_in}'
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            start = self.check_in
+            end = self.check_out
+            difference = end - start
+            is_already_booked = BookedDay.objects.filter(day__range=(start, end)).exists()
+            if not is_already_booked:
+                super().save(*args, **kwargs)
+                for i in range(difference.days + 1):
+                    day = start + timezone.timedelta(days=i)
+                    BookedDay.objects.create(day=day, reservation=self)
+                return
+        return super().save()
+
+        #
+        #     for i in range(difference):
+        #
+        #     existing_book_already = Reservation.objects.filter(check_in=)
+        # else:
+        #     print('im old')
