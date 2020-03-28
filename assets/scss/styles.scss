@@ -93,4 +93,18 @@ form{
 .border-section{
   @apply pb-5 border-b border-gray-400 mb-5;
 }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 2.5rem);
+  grid-gap: 10px;
+  justify-items: center;
+}
+
+.day_number{
+  @apply bg-gray-300 w-full rounded text-center text-gray-700 p-1 text-sm cursor-pointer;
+}
+.is_past{
+    @apply text-gray-400;
+  }
 @tailwind utilities;

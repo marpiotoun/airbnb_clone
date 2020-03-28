@@ -1,8 +1,9 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.timezone import now
 from django_countries import countries
 from core import models as core_models
-
+from cal import Calendar
 
 class AbstractItem(core_models.AbstractTimeStampedModel):
     """Item Model Definition"""
@@ -113,5 +114,15 @@ class Room(core_models.AbstractTimeStampedModel):
     def get_absolute_url(self):
         return reverse("room:detail", kwargs={'pk': self.pk})
 
+    def get_calendars(self):
+        this_month = Calendar(now().date().year, now().date().month)
+        next_month = Calendar(now().date().year, now().date().month+1)
+        return [this_month, next_month]
+
     def __str__(self):
         return self.name
+
+
+
+
+
