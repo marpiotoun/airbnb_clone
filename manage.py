@@ -2,6 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import platform
 import dotenv
 
 def main():
@@ -18,5 +19,9 @@ def main():
 
 
 if __name__ == '__main__':
-    dotenv.load_dotenv()
+    if platform.system() == 'Windows':
+        dotenv.read_dotenv()
+    elif platform.system() == 'Darwin':
+        dotenv.load_dotenv()
+
     main()
