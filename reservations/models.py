@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from core.models import AbstractTimeStampedModel
+from core import managers
 
 
 class BookedDay(AbstractTimeStampedModel):
@@ -26,15 +27,19 @@ class Reservation(AbstractTimeStampedModel):
     check_in = models.DateField()
     check_out = models.DateField()
 
+    objects = managers.CustomManager()
+
     def in_progress(self):
         now = timezone.now().date()
-        return now >= self.check_in and now <= self.check_out
+        return self.check_in <= now <= self.check_out
+    in_progress.boolean = True
 
     def is_finished(self):
         now = timezone.now().date()
-        return now > self.check_out
-
-    in_progress.boolean = True
+        is_finished = now > self.check_out
+        if is_finished:
+            BookedDay.objects.filter(reservation=self).delete()
+        return is_finished
     is_finished.boolean = True
 
     def __str__(self):

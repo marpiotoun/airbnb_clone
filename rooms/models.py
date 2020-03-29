@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.utils.timezone import now
 from django_countries import countries
 from core import models as core_models
+from core.managers import CustomManager
 from cal import Calendar
 
 class AbstractItem(core_models.AbstractTimeStampedModel):
@@ -80,6 +81,8 @@ class Room(core_models.AbstractTimeStampedModel):
     facility = models.ManyToManyField('Facility', related_name='rooms', blank=True)
     # HouseRule
     house_rule = models.ManyToManyField('HouseRule', related_name='rooms', blank=True)
+
+    objects = CustomManager()
 
     #SAVE
     def save(self, *args, **kwargs):
