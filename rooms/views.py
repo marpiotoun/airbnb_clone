@@ -281,7 +281,6 @@ class CreateRoomView(LoggedInOnlyMixin, FormView):
 
 
 
-
 # 2
 # def all_rooms(request):
 #     page = request.GET.get('page', 1)

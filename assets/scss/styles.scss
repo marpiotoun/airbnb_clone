@@ -107,4 +107,7 @@ form{
 .is_past{
     @apply text-gray-400;
   }
+.is_booked{
+  @apply bg-red-400 cursor-default line-through;
+}
 @tailwind utilities;
