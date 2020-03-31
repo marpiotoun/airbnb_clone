@@ -4,6 +4,7 @@
         <span>&copy; {% trans "Its clone of Airbnb" %}</span>
     </div>
     {% get_current_language as LANGUAGE_CODE %}
+    {{ LANGUAGE_CODE }}
     <select class="absolute right-0 mr-4 mb-4" id="js-lang">
         <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>
             English
