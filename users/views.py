@@ -7,10 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.files.base import ContentFile
+from django.http import HttpResponse
 from django.views.generic import FormView, DetailView, UpdateView
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
+from django.utils import translation
+from django.utils.translation import gettext, gettext_lazy as _
 from django import forms as django_forms
 from . import forms, models
 from users.mixin import LoggedOutOnlyMixin, LoggedInOnlyMixin, EmailLoginOnlyMixin
@@ -246,6 +248,13 @@ def switch_host(request):
     except KeyError:
         request.session['is_hosting'] = True
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+def switch_language(request):
+    lang = request.GET.get("lang", None)
+    if lang is not None:
+        request.session[translation.LANGUAGE_SESSION_KEY] = lang
+    return HttpResponse(status=200)
 
 
 # from django.views import View

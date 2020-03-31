@@ -5,6 +5,7 @@ import sys
 import platform
 import dotenv
 
+
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'airbnb_clone.settings')
     try:
